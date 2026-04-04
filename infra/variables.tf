@@ -1,5 +1,5 @@
 variable "project_name" {
-  description = "Project name used in resource names and tags"
+  description = "Project name used in resource names and tags (e.g. playground, myapp)"
   type        = string
   default     = "playground"
 }
