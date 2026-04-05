@@ -29,6 +29,7 @@ jobs:
   terraform-apply:
     name: Terraform Apply (${{ github.event.inputs.environment || 'dev' }})
     runs-on: ubuntu-latest
+    environment: production
 
     steps:
       - name: Checkout repository
