@@ -6,6 +6,16 @@ on:
       - main
     paths:
       - "infra/**"
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: "Environment to plan"
+        required: true
+        default: "dev"
+        type: choice
+        options:
+          - dev
+          - prod
 
 permissions:
   contents: read
@@ -14,10 +24,11 @@ permissions:
 env:
   TF_WORKING_DIR: infra
   AWS_REGION: us-east-1
+  ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
 
 jobs:
   terraform-plan:
-    name: Terraform Plan
+    name: Terraform Plan (${{ github.event.inputs.environment || 'dev' }})
     runs-on: ubuntu-latest
 
     steps:
@@ -44,7 +55,7 @@ jobs:
 
       - name: Terraform Init
         id: init
-        run: terraform init
+        run: terraform init -backend-config="key=eks/${{ env.ENVIRONMENT }}/terraform.tfstate"
         working-directory: ${{ env.TF_WORKING_DIR }}
 
       - name: Terraform Validate
@@ -54,7 +65,10 @@ jobs:
 
       - name: Terraform Plan
         id: plan
-        run: terraform plan -no-color -var="environment=dev" -out=tfplan
+        run: |
+          terraform plan -no-color \
+            -var-file="envs/${{ env.ENVIRONMENT }}.tfvars" \
+            -out=tfplan
         working-directory: ${{ env.TF_WORKING_DIR }}
         continue-on-error: true
 
@@ -77,19 +91,20 @@ jobs:
               comment.body.includes('Terraform Plan Results')
             );
 
-            const fmt     = '${{ steps.fmt.outcome }}';
-            const init    = '${{ steps.init.outcome }}';
+            const fmt      = '${{ steps.fmt.outcome }}';
+            const init     = '${{ steps.init.outcome }}';
             const validate = '${{ steps.validate.outcome }}';
-            const plan    = '${{ steps.plan.outcome }}';
+            const plan     = '${{ steps.plan.outcome }}';
+            const env      = '${{ env.ENVIRONMENT }}';
 
-            const output = `### Terraform Plan Results 📋
+            const output = `### Terraform Plan Results 📋 \`${env}\`
 
             | Step | Status |
             |------|--------|
-            | Format | ${fmt === 'success' ? '✅' : '❌'} \`${fmt}\` |
-            | Init   | ${init === 'success' ? '✅' : '❌'} \`${init}\` |
+            | Format   | ${fmt === 'success' ? '✅' : '❌'} \`${fmt}\` |
+            | Init     | ${init === 'success' ? '✅' : '❌'} \`${init}\` |
             | Validate | ${validate === 'success' ? '✅' : '❌'} \`${validate}\` |
-            | Plan | ${plan === 'success' ? '✅' : '⚠️'} \`${plan}\` |
+            | Plan     | ${plan === 'success' ? '✅' : '⚠️'} \`${plan}\` |
 
             <details><summary>Show Plan Output</summary>
 

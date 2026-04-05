@@ -1,21 +1,19 @@
-name: Terraform Apply
+name: Terraform Destroy
 
 on:
-  push:
-    branches:
-      - main
-    paths:
-      - "infra/**"
   workflow_dispatch:
     inputs:
       environment:
-        description: "Environment to apply"
+        description: "Environment to destroy"
         required: true
         default: "dev"
         type: choice
         options:
           - dev
           - prod
+      confirm:
+        description: "Type DESTROY to confirm"
+        required: true
 
 permissions:
   contents: read
@@ -23,12 +21,12 @@ permissions:
 env:
   TF_WORKING_DIR: infra
   AWS_REGION: us-east-1
-  ENVIRONMENT: ${{ github.event.inputs.environment || 'dev' }}
 
 jobs:
-  terraform-apply:
-    name: Terraform Apply (${{ github.event.inputs.environment || 'dev' }})
+  terraform-destroy:
+    name: Terraform Destroy (${{ github.event.inputs.environment }})
     runs-on: ubuntu-latest
+    if: github.event.inputs.confirm == 'DESTROY'
 
     steps:
       - name: Checkout repository
@@ -47,15 +45,11 @@ jobs:
           terraform_version: "~1.5"
 
       - name: Terraform Init
-        run: terraform init -backend-config="key=eks/${{ env.ENVIRONMENT }}/terraform.tfstate"
+        run: terraform init -backend-config="key=eks/${{ github.event.inputs.environment }}/terraform.tfstate"
         working-directory: ${{ env.TF_WORKING_DIR }}
 
-      - name: Terraform Validate
-        run: terraform validate -no-color
-        working-directory: ${{ env.TF_WORKING_DIR }}
-
-      - name: Terraform Apply
+      - name: Terraform Destroy
         run: |
-          terraform apply -auto-approve \
-            -var-file="envs/${{ env.ENVIRONMENT }}.tfvars"
+          terraform destroy -auto-approve \
+            -var-file="envs/${{ github.event.inputs.environment }}.tfvars"
         working-directory: ${{ env.TF_WORKING_DIR }}
