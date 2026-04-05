@@ -19,6 +19,7 @@ crash.*.log
 *.tfvars
 *.tfvars.json
 !terraform.tfvars.example
+!infra/envs/*.tfvars
 
 # Environment variables
 .env
