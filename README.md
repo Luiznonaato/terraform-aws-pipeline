@@ -82,8 +82,9 @@ Developer
 |----------|---------|--------|
 | `terraform-plan.yml` | Pull Request to `main` | Runs `terraform plan`, posts output as PR comment |
 | `terraform-apply.yml` | Push/merge to `main` | Runs `terraform apply -auto-approve` |
+| `terraform-destroy.yml` | Manual dispatch only | Runs `terraform destroy` — requires typing "DESTROY" to confirm |
 
-Both workflows only run when files inside `infra/` change.
+The plan and apply workflows only run when files inside `infra/` change.
 
 ---
 
@@ -94,7 +95,8 @@ terraform-aws-pipeline/
 ├── .github/
 │   └── workflows/
 │       ├── terraform-plan.yml
-│       └── terraform-apply.yml
+│       ├── terraform-apply.yml
+│       └── terraform-destroy.yml
 ├── infra/
 │   ├── main.tf          # Provider, root module calls
 │   ├── variables.tf     # Input variables
@@ -176,4 +178,4 @@ The IAM user needs the following permissions: `AmazonEKSFullAccess`, `AmazonVPCF
 
 ## Related Projects
 
-- [eks-cluster](https://github.com/Luiznonaato/eks-cluster) — original EKS infrastructure (project 3/100)
+- [eks-cluster](https://github.com/Luiznonaato/eks-cluster) — original EKS infrastructure (project 1/100)
