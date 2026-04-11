@@ -1,6 +1,6 @@
 # terraform-aws-pipeline
 
-> **Cloud Infra Challenge — Project 4/100**
+> **Cloud Infra Challenge — Project 5/100**
 
 Terraform project with a fully automated GitHub Actions CI/CD pipeline for provisioning an EKS cluster on AWS. Infrastructure code is adapted from [eks-cluster](https://github.com/Luiznonaato/eks-cluster).
 
